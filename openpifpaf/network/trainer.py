@@ -286,6 +286,7 @@ class Trainer():
         head_epoch_counts = None
         last_batch_end = time.time()
         self.optimizer.zero_grad()
+        scenes = scenes if not hasattr(self, 'cache') else self.cache
         for batch_idx, (data, target, _) in enumerate(scenes):
             preprocess_time = time.time() - last_batch_end
 
@@ -332,6 +333,9 @@ class Trainer():
                 self.lr_scheduler.step()
 
             if self.n_train_batches and batch_idx + 1 >= self.n_train_batches:
+                # cache 
+                if self.n_train_batches == 1:
+                    self.cache = [(data, target, _)]
                 break
 
             last_batch_end = time.time()
