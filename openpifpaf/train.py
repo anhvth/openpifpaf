@@ -9,8 +9,8 @@ import socket
 
 import torch
 
-from . import datasets, encoder, logger, network, optimize, plugin, show, visualizer
-from . import __version__
+from openpifpaf import datasets, encoder, logger, network, optimize, plugin, show, visualizer
+from openpifpaf import __version__
 
 LOG = logging.getLogger(__name__)
 
