@@ -23,9 +23,11 @@ class Cif:
 
     side_length: ClassVar[int] = 4
     padding: ClassVar[int] = 10
-
+    
     def __call__(self, image, anns, meta):
-        return CifGenerator(self)(image, anns, meta)
+        # init a cif-generator then call it
+        cif = CifGenerator(self)
+        return cif(image, anns, meta)
 
 
 class CifGenerator():
@@ -56,7 +58,7 @@ class CifGenerator():
 
         n_fields = len(self.config.meta.keypoints)
         self.init_fields(n_fields, bg_mask)
-        self.fill(keypoint_sets)
+        self.fill_keypoint_list(keypoint_sets)
         fields = self.fields(valid_area)
 
         self.visualizer.processed_image(image)
@@ -78,25 +80,25 @@ class CifGenerator():
         self.fields_reg_l[:, p:-p, p:-p][:, bg_mask == 0] = 1.0
         self.intensities[:, p:-p, p:-p][:, bg_mask == 0] = np.nan
 
-    def fill(self, keypoint_sets):
-        for keypoints in keypoint_sets:
-            self.fill_keypoints(keypoints)
+    def fill_keypoint_list(self, keypoint_sets):
+        for instance_keypoints in keypoint_sets:
+            self.fill_keypoint_single_instance(instance_keypoints)
 
-    def fill_keypoints(self, keypoints):
+    def fill_keypoint_single_instance(self, keypoints):
         scale = self.rescaler.scale(keypoints)
-        for f, xyv in enumerate(keypoints):
+        for keypoint_id, xyv in enumerate(keypoints):
             if xyv[2] <= self.config.v_threshold:
                 continue
 
             joint_scale = (
                 scale
                 if self.config.meta.sigmas is None
-                else scale * self.config.meta.sigmas[f]
+                else scale * self.config.meta.sigmas[keypoint_id]
             )
 
-            self.fill_coordinate(f, xyv, joint_scale)
+            self.fill_coordinate(keypoint_id, xyv, joint_scale)
 
-    def fill_coordinate(self, f, xyv, scale):
+    def fill_coordinate(self, keypoint_id, xyv, scale):
         ij = np.round(xyv[:2] - self.s_offset).astype(np.int) + self.config.padding
         minx, miny = int(ij[0]), int(ij[1])
         maxx, maxy = minx + self.config.side_length, miny + self.config.side_length
@@ -110,25 +112,25 @@ class CifGenerator():
         # mask
         sink_reg = self.sink + offset
         sink_l = np.linalg.norm(sink_reg, axis=0)
-        mask = sink_l < self.fields_reg_l[f, miny:maxy, minx:maxx]
+        mask = sink_l < self.fields_reg_l[keypoint_id, miny:maxy, minx:maxx]
         mask_peak = np.logical_and(mask, sink_l < 0.7)
-        self.fields_reg_l[f, miny:maxy, minx:maxx][mask] = sink_l[mask]
+        self.fields_reg_l[keypoint_id, miny:maxy, minx:maxx][mask] = sink_l[mask]
 
         # update intensity
-        self.intensities[f, miny:maxy, minx:maxx][mask] = 1.0
-        self.intensities[f, miny:maxy, minx:maxx][mask_peak] = 1.0
+        self.intensities[keypoint_id, miny:maxy, minx:maxx][mask] = 1.0
+        self.intensities[keypoint_id, miny:maxy, minx:maxx][mask_peak] = 1.0
 
         # update regression
-        patch = self.fields_reg[f, :, miny:maxy, minx:maxx]
+        patch = self.fields_reg[keypoint_id, :, miny:maxy, minx:maxx]
         patch[:, mask] = sink_reg[:, mask]
 
         # update bmin
         bmin = self.config.bmin / self.config.meta.stride
-        self.fields_bmin[f, miny:maxy, minx:maxx][mask] = bmin
+        self.fields_bmin[keypoint_id, miny:maxy, minx:maxx][mask] = bmin
 
         # update scale
         assert np.isnan(scale) or 0.0 < scale < 100.0
-        self.fields_scale[f, miny:maxy, minx:maxx][mask] = scale
+        self.fields_scale[keypoint_id, miny:maxy, minx:maxx][mask] = scale
 
     def fields(self, valid_area):
         p = self.config.padding

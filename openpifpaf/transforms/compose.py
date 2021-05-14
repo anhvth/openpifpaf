@@ -9,9 +9,9 @@ class Compose(Preprocess):
         self.preprocess_list = preprocess_list
 
     def __call__(self, *args):
-        for p in self.preprocess_list:
-            if p is None:
+        for trans in self.preprocess_list:
+            if trans is None:
                 continue
-            args = p(*args)
+            args = trans(*args)
 
         return args

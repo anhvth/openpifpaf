@@ -9,7 +9,7 @@ import socket
 
 import torch
 
-from . import (__version__, datasets, encoder, logger, network, optimize,
+from openpifpaf import (__version__, datasets, encoder, logger, network, optimize,
                plugin, show, visualizer)
 
 LOG = logging.getLogger(__name__)

@@ -60,25 +60,25 @@ class Cif(Base):
 
     def _regressions(self, regression_fields, scale_fields, *,
                      annotations=None, confidence_fields=None, uv_is_offset=True):
-        for f in self.indices('regression'):
-            LOG.debug('%s', self.meta.keypoints[f])
-            confidence_field = confidence_fields[f] if confidence_fields is not None else None
+        for field in self.indices('regression'):
+            LOG.debug('%s', self.meta.keypoints[field])
+            confidence_field = confidence_fields[field] if confidence_fields is not None else None
 
             with self.image_canvas(self._processed_image, margin=[0.0, 0.01, 0.05, 0.01]) as ax:
                 show.white_screen(ax, alpha=0.5)
                 if annotations:
                     self.annotation_painter.annotations(ax, annotations, color='lightgray')
                 q = show.quiver(ax,
-                                regression_fields[f, :2],
+                                regression_fields[field, :2],
                                 confidence_field=confidence_field,
                                 xy_scale=self.meta.stride, uv_is_offset=uv_is_offset,
                                 cmap='Oranges', clim=(0.5, 1.0), width=0.001)
-                show.boxes(ax, scale_fields[f] / 2.0,
+                show.boxes(ax, scale_fields[field] / 2.0,
                            confidence_field=confidence_field,
-                           regression_field=regression_fields[f, :2],
+                           regression_field=regression_fields[field, :2],
                            xy_scale=self.meta.stride, cmap='Oranges', fill=False,
                            regression_field_is_offset=uv_is_offset)
-                if f in self.indices('margin', with_all=False):
-                    show.margins(ax, regression_fields[f, :6], xy_scale=self.meta.stride)
+                if field in self.indices('margin', with_all=False):
+                    show.margins(ax, regression_fields[field, :6], xy_scale=self.meta.stride)
 
                 self.colorbar(ax, q)

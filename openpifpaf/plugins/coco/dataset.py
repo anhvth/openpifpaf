@@ -108,6 +108,7 @@ class CocoDataset(torch.utils.data.Dataset):
 
         image_info = self.coco.loadImgs(image_id)[0]
         LOG.debug(image_info)
+        # LOG.debug("Num of keypoints first instance: {}".format(len(anns[0]['keypoints'])))
         local_file_path = os.path.join(self.image_dir, image_info['file_name'])
         with open(local_file_path, 'rb') as f:
             image = Image.open(f).convert('RGB')

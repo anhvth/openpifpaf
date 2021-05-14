@@ -7,11 +7,10 @@
 # ln -s /root/openpifpaf/data/out/annotations/mini_json.json data-mscoco/annotations/person_keypoints_val2017.json
 # ln -s /root/openpifpaf/data/out/images data-mscoco/images/train2017
 # ln -s /root/openpifpaf/data/out/images data-mscoco/images/val2017
-python -m openpifpaf.train \
+dpython openpifpaf/train.py \
   --lr=10e-4 --momentum=0.9 --b-scale=5.0 \
   --epochs=1000 --lr-warm-up-epochs=100 \
   --batch-size=1 --train-batches=1 --val-batches=1 --val-interval=100 \
   --weight-decay=1e-5 \
   --dataset=cocokp --cocokp-upsample=2 --cocokp-no-augmentation \
-  --basenet=resnet50
-#   --basenet=shufflenetv2k16
+  --basenet=shufflenetv2k16 --debug --debug-indices cif:1 --save-all

@@ -54,6 +54,7 @@ class Base:
             return
 
         image = np.moveaxis(np.asarray(image), 0, -1)
+        # this method of rescaling is not 100% coorect, need to use mmcv tensor2image
         image = np.clip(image / cls.processed_image_intensity_spread * 0.5 + 0.5, 0.0, 1.0)
         Base._processed_image = image
 
@@ -99,14 +100,15 @@ class Base:
         head_names = self.head_name
         if not isinstance(head_names, (tuple, list)):
             head_names = (head_names,)
-        return [
-            f for hn, f, r_type in self.all_indices
-            if hn in head_names and (
+        rt = []
+        for head_name, f, r_type in self.all_indices:
+            if head_name in head_names and (
                 type_ is None
                 or (with_all and r_type == 'all')
                 or type_ == r_type
-            )
-        ]
+            ):
+                rt += [f]
+        return rt
 
     @staticmethod
     def colorbar(ax, colored_element, size='3%', pad=0.01):
