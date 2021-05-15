@@ -45,7 +45,7 @@ class CifSeeds:
             c, x, y, _, s = p
 
             start_sv = time.perf_counter()
-            if self.ablation_no_rescore:
+            if self.ablation_no_rescore :
                 v = c
             else:
                 v = scalar_values(self.cifhr[field_i],
@@ -59,7 +59,6 @@ class CifSeeds:
             m = v > self.threshold
             x, y, v, s = x[m] * meta.stride, y[m] * meta.stride, v[m], s[m] * meta.stride
             for vv, xx, yy, ss in zip(v, x, y, s):
-                vv = 1
                 self.seeds.append((vv, field_i, xx, yy, ss))
 
         LOG.debug('seeds %d, %.3fs (C++ %.3fs)', len(self.seeds), time.perf_counter() - start, sv)

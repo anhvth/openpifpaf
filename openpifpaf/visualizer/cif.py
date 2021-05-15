@@ -39,15 +39,15 @@ class Cif(Base):
             for ann in annotation_dicts
         ]
 
-        self._confidences(field[:, 0], name_signature=name_signature)
-        self._regressions(field[:, 1:3], field[:, 4], annotations=annotations, name_signature=name_signature)
+        self._confidences(field[:, 0], name_signature=name_signature+'_conf')
+        self._regressions(field[:, 1:3], field[:, 4], annotations=annotations, name_signature=name_signature+'_reg')
 
     def predicted(self, field, name_signature='cif-predict'):
-        self._confidences(field[:, 0], name_signature=name_signature)
+        self._confidences(field[:, 0], name_signature=name_signature+'_conf')
         self._regressions(field[:, 1:3], field[:, 4],
                           annotations=self._ground_truth,
                           confidence_fields=field[:, 0],
-                          uv_is_offset=False, name_signature=name_signature)
+                          uv_is_offset=False, name_signature=name_signature+'_reg')
 
     def _confidences(self, confidences, name_signature=None):
         for f in self.indices('confidence'):

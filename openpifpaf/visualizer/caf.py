@@ -38,9 +38,9 @@ class Caf(Base):
             for ann in annotation_dicts
         ]
 
-        self._confidences(field[:, 0], name_signature=name_signature)
+        self._confidences(field[:, 0], name_signature=name_signature+'_conf')
         self._regressions(field[:, 1:3], field[:, 3:5], field[:, 7], field[:, 8],
-                          annotations=annotations, name_signature=name_signature)
+                          annotations=annotations, name_signature=name_signature+'_reg')
 
     def predicted(self, field):
         self._confidences(field[:, 0], name_signature='caf-predicted')

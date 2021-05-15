@@ -22,8 +22,8 @@ HFLIP = {
 
 
 PARKING_LINE_SIGMAS = [
-    0.026,  # p1
-    0.025,  # p2
+    0.0025,  # p1
+    0.0025,  # p2
 ]
 
 # PARKING_LINE_SCORE_WEIGHTS = [3.0] * 3 + [1.0] * (len(PARKING_KEYPOINTS) - 3)

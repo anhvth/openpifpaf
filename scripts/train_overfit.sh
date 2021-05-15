@@ -13,7 +13,7 @@
 #   --batch-size=1 --train-batches=1 --val-batches=1 --val-interval=100 \
 #   --weight-decay=1e-5 \
 #   --dataset=cocokp --cocokp-upsample=2 --cocokp-no-augmentation \
-#   --basenet=resnet50 --debug --debug-indices cif:1 --save-all
+#   --basenet=resnet50 --debug --debug-indices cif:1 --save-all 
 
 
 #--------------- Overfit -lot
@@ -29,7 +29,7 @@
 #--------------- Overfit - line
 rm -r ./outputs
 python openpifpaf/train.py \
-  --lr=10e-4 --momentum=0.9 --b-scale=5.0 \
+  --lr=10e-5 --momentum=0.9 --b-scale=5.0 \
   --epochs=1000 --lr-warm-up-epochs=100 \
   --batch-size=1 --train-batches=1 --val-batches=1 --val-interval=10000 \
   --weight-decay=1e-5 \

@@ -15,3 +15,10 @@ class Compose(Preprocess):
             args = trans(*args)
 
         return args
+    def __str__(self):
+        s = ''
+        for trans in self.preprocess_list:
+            if trans is None:
+                continue
+            s += str(type(trans))+"\n"
+        return s

@@ -23,9 +23,6 @@ def _load_annotation(im_path):
         objects = content.split('\n')
         for obj in objects:
             if len(obj.split()) == 9:
-                class_name = obj.split()[0]
-                # if class_name != '0':
-                # continue
                 box = obj.split()[1:9]
                 boxes.append(box)
     boxes = [process(_) for _ in boxes]
