@@ -64,7 +64,6 @@ class CifGenerator():
         self.visualizer.processed_image(image)
         img_basename = get_name(meta['file_name'])
         name_signature = f'cif-target-{img_basename}'
-        
         self.visualizer.targets(fields, annotation_dicts=anns, name_signature=name_signature)
 
         return fields

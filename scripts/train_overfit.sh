@@ -31,7 +31,7 @@ rm -r ./outputs
 python openpifpaf/train.py \
   --lr=10e-4 --momentum=0.9 --b-scale=5.0 \
   --epochs=1000 --lr-warm-up-epochs=100 \
-  --batch-size=1 --train-batches=1 --val-batches=1 --val-interval=1000 \
+  --batch-size=1 --train-batches=1 --val-batches=1 --val-interval=10000 \
   --weight-decay=1e-5 \
   --dataset=parking_line_kp --parking_line_kp-upsample=2 --parking_line_kp-no-augmentation \
   --basenet=resnet50 $@

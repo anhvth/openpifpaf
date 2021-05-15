@@ -7,17 +7,17 @@ from avcv import *
 
 from .dataset import CocoDataset
 from .constants import (
-    PARKING_LINE_SKELETON,
+    PARKING_LOT_SKELETON,
     PARKING_KEYPOINTS,
-    PARKING_LINE_SIGMAS,
-    PARKING_POSE,
+    PARKING_LOT_SIGMAS,
+    PARKING_UPRIGHT_POSE,
     # COCO_CATEGORIES,
     # PARKING_KEYPOINTS,
     # PARKING_PERSON_SKELETON,
     # PARKING_PERSON_SIGMAS,
     PARKING_CATEGORIES,
-    PARKING_LINE_SCORE_WEIGHTS,
-    # PARKING_POSE,
+    PARKING_LOT_SCORE_WEIGHTS,
+    # PARKING_UPRIGHT_POSE,
     # DENSER_COCO_PERSON_CONNECTIONS,
     HFLIP,
 )
@@ -31,11 +31,6 @@ except ImportError:
 
 ROOT_DIR = '/data/fisheye-parking/1k8_12Mar/'
 class ParkingLineKp(openpifpaf.datasets.DataModule, openpifpaf.Configurable):
-    # _test2017_annotations = 'data-mscoco/annotations/image_info_test2017.json'
-    # _testdev2017_annotations = 'data-mscoco/annotations/image_info_test-dev2017.json'
-    # _test2017_image_dir = 'data-mscoco/images/test2017/'
-
-    # cli configurable
     train_annotations = osp.join(ROOT_DIR, 'train_keypoints.json')
     val_annotations = osp.join(ROOT_DIR, 'val_keypoints.json')
     eval_annotations = val_annotations
@@ -59,23 +54,23 @@ class ParkingLineKp(openpifpaf.datasets.DataModule, openpifpaf.Configurable):
     eval_orientation_invariant = 0.0
     eval_extended_scale = False
 
-    skeleton = PARKING_LINE_SKELETON
+    skeleton = PARKING_LOT_SKELETON
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        cif = openpifpaf.headmeta.Cif('cif', 'parking_line_kp',
+        cif = openpifpaf.headmeta.Cif('cif', 'parkingkp',
                                       keypoints=PARKING_KEYPOINTS,
-                                      sigmas=PARKING_LINE_SIGMAS,
-                                      pose=PARKING_POSE,
+                                      sigmas=PARKING_LOT_SIGMAS,
+                                      pose=PARKING_UPRIGHT_POSE,
                                       draw_skeleton=self.skeleton,
-                                      score_weights=PARKING_LINE_SCORE_WEIGHTS)
-        caf = openpifpaf.headmeta.Caf('caf', 'parking_line_kp',
+                                      score_weights=PARKING_LOT_SCORE_WEIGHTS)
+        caf = openpifpaf.headmeta.Caf('caf', 'parkingkp',
                                       keypoints=PARKING_KEYPOINTS,
-                                      sigmas=PARKING_LINE_SIGMAS,
-                                      pose=PARKING_POSE,
+                                      sigmas=PARKING_LOT_SIGMAS,
+                                      pose=PARKING_UPRIGHT_POSE,
                                       skeleton=self.skeleton)
-        # dcaf = openpifpaf.headmeta.Caf('caf25', 'parking_line_kp',
+        # dcaf = openpifpaf.headmeta.Caf('caf25', 'parkingkp',
         #                                keypoints=PARKING_KEYPOINTS,
         #                                sigmas=PARKING_PERSON_SIGMAS,
         #                                pose=COCO_UPRIGHT_POSE,
@@ -91,56 +86,56 @@ class ParkingLineKp(openpifpaf.datasets.DataModule, openpifpaf.Configurable):
 
     @classmethod
     def cli(cls, parser: argparse.ArgumentParser):
-        group = parser.add_argument_group('data module parking_line_kp')
+        group = parser.add_argument_group('data module parkingkp')
 
-        group.add_argument('--parking_line_kp-train-annotations', default=cls.train_annotations,
+        group.add_argument('--parkingkp-train-annotations', default=cls.train_annotations,
                            help='train annotations')
-        group.add_argument('--parking_line_kp-val-annotations', default=cls.val_annotations,
+        group.add_argument('--parkingkp-val-annotations', default=cls.val_annotations,
                            help='val annotations')
-        group.add_argument('--parking_line_kp-train-image-dir', default=cls.train_image_dir,
+        group.add_argument('--parkingkp-train-image-dir', default=cls.train_image_dir,
                            help='train image dir')
-        group.add_argument('--parking_line_kp-val-image-dir', default=cls.val_image_dir,
+        group.add_argument('--parkingkp-val-image-dir', default=cls.val_image_dir,
                            help='val image dir')
 
-        group.add_argument('--parking_line_kp-square-edge',
+        group.add_argument('--parkingkp-square-edge',
                            default=cls.square_edge, type=int,
                            help='square edge of input images')
         assert not cls.with_dense
-        group.add_argument('--parking_line_kp-with-dense',
+        group.add_argument('--parkingkp-with-dense',
                            default=False, action='store_true',
                            help='train with dense connections')
         assert not cls.extended_scale
-        group.add_argument('--parking_line_kp-extended-scale',
+        group.add_argument('--parkingkp-extended-scale',
                            default=False, action='store_true',
                            help='augment with an extended scale range')
-        group.add_argument('--parking_line_kp-orientation-invariant',
+        group.add_argument('--parkingkp-orientation-invariant',
                            default=cls.orientation_invariant, type=float,
                            help='augment with random orientations')
-        group.add_argument('--parking_line_kp-blur',
+        group.add_argument('--parkingkp-blur',
                            default=cls.blur, type=float,
                            help='augment with blur')
         assert cls.augmentation
-        group.add_argument('--parking_line_kp-no-augmentation',
-                           dest='parking_line_kp_augmentation',
+        group.add_argument('--parkingkp-no-augmentation',
+                           dest='parkingkp_augmentation',
                            default=True, action='store_false',
                            help='do not apply data augmentation')
-        group.add_argument('--parking_line_kp-rescale-images',
+        group.add_argument('--parkingkp-rescale-images',
                            default=cls.rescale_images, type=float,
                            help='overall rescale factor for images')
-        group.add_argument('--parking_line_kp-upsample',
+        group.add_argument('--parkingkp-upsample',
                            default=cls.upsample_stride, type=int,
                            help='head upsample stride')
-        group.add_argument('--parking_line_kp-min-kp-anns',
+        group.add_argument('--parkingkp-min-kp-anns',
                            default=cls.min_kp_anns, type=int,
                            help='filter images with fewer keypoint annotations')
-        group.add_argument('--parking_line_kp-bmin',
+        group.add_argument('--parkingkp-bmin',
                            default=cls.bmin, type=float,
                            help='bmin')
 
         # evaluation
         eval_set_group = group.add_mutually_exclusive_group()
-        eval_set_group.add_argument('--parking_line_kp-eval-test2017', default=False, action='store_true')
-        eval_set_group.add_argument('--parking_line_kp-eval-testdev2017', default=False, action='store_true')
+        eval_set_group.add_argument('--parkingkp-eval-test2017', default=False, action='store_true')
+        eval_set_group.add_argument('--parkingkp-eval-testdev2017', default=False, action='store_true')
 
         # assert cls.eval_annotation_filter
         # group.add_argument('--coco-no-eval-annotation-filter',
@@ -159,30 +154,30 @@ class ParkingLineKp(openpifpaf.datasets.DataModule, openpifpaf.Configurable):
         cls.debug = args.debug
         cls.pin_memory = args.pin_memory
 
-        # parking_line_kp specific
-        cls.train_annotations = args.parking_line_kp_train_annotations
-        cls.val_annotations = args.parking_line_kp_val_annotations
-        cls.train_image_dir = args.parking_line_kp_train_image_dir
-        cls.val_image_dir = args.parking_line_kp_val_image_dir
+        # parkingkp specific
+        cls.train_annotations = args.parkingkp_train_annotations
+        cls.val_annotations = args.parkingkp_val_annotations
+        cls.train_image_dir = args.parkingkp_train_image_dir
+        cls.val_image_dir = args.parkingkp_val_image_dir
 
-        cls.square_edge = args.parking_line_kp_square_edge
-        cls.with_dense = args.parking_line_kp_with_dense
-        cls.extended_scale = args.parking_line_kp_extended_scale
-        cls.orientation_invariant = args.parking_line_kp_orientation_invariant
-        cls.blur = args.parking_line_kp_blur
-        cls.augmentation = args.parking_line_kp_augmentation
-        cls.rescale_images = args.parking_line_kp_rescale_images
-        cls.upsample_stride = args.parking_line_kp_upsample
-        cls.min_kp_anns = args.parking_line_kp_min_kp_anns
-        cls.bmin = args.parking_line_kp_bmin
+        cls.square_edge = args.parkingkp_square_edge
+        cls.with_dense = args.parkingkp_with_dense
+        cls.extended_scale = args.parkingkp_extended_scale
+        cls.orientation_invariant = args.parkingkp_orientation_invariant
+        cls.blur = args.parkingkp_blur
+        cls.augmentation = args.parkingkp_augmentation
+        cls.rescale_images = args.parkingkp_rescale_images
+        cls.upsample_stride = args.parkingkp_upsample
+        cls.min_kp_anns = args.parkingkp_min_kp_anns
+        cls.bmin = args.parkingkp_bmin
 
         # evaluation
         cls.eval_annotation_filter = args.coco_eval_annotation_filter
-        if args.parking_line_kp_eval_test2017:
+        if args.parkingkp_eval_test2017:
             cls.eval_image_dir = cls._test2017_image_dir
             cls.eval_annotations = cls._test2017_annotations
             cls.annotation_filter = False
-        if args.parking_line_kp_eval_testdev2017:
+        if args.parkingkp_eval_testdev2017:
             cls.eval_image_dir = cls._test2017_image_dir
             cls.eval_annotations = cls._testdev2017_annotations
             cls.annotation_filter = False
@@ -190,7 +185,7 @@ class ParkingLineKp(openpifpaf.datasets.DataModule, openpifpaf.Configurable):
         cls.eval_orientation_invariant = args.coco_eval_orientation_invariant
         cls.eval_extended_scale = args.coco_eval_extended_scale
 
-        if (args.parking_line_kp_eval_test2017 or args.parking_line_kp_eval_testdev2017) \
+        if (args.parkingkp_eval_test2017 or args.parkingkp_eval_testdev2017) \
                 and not args.write_predictions and not args.debug:
             raise Exception('have to use --write-predictions for this dataset')
 
