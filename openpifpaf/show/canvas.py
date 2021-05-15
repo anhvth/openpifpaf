@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import logging
+import os.path as osp 
 import os
 
 import numpy as np
@@ -80,11 +81,16 @@ class Canvas:
 
     @classmethod
     @contextmanager
-    def image(cls, image, fig_file=None, *, margin=None, **kwargs):
+    def image(cls, image, fig_file=None, *, margin=None, name_signature=False, **kwargs):
         if plt is None:
             raise Exception('please install matplotlib')
         if fig_file is None:
             fig_file = cls.generic_name()
+        if name_signature:
+            dir_name = osp.dirname(fig_file)
+            file_name = osp.basename(fig_file)
+            fig_file = osp.join(dir_name, f'{name_signature}_{file_name}')
+
 
         image = np.asarray(image)
 

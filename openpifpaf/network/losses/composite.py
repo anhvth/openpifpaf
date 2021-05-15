@@ -146,13 +146,13 @@ class CompositeLoss(torch.nn.Module):
 
         return losses
 
-    def forward(self, x, t):
+    def forward(self, x, target):
         LOG.debug('loss for %s', self.field_names)
 
-        if t is None:
+        if target is None:
             return [None for _ in range(1 + self.n_vectors + self.n_scales)]
         assert x.shape[2] == 1 + self.n_vectors * 3 + self.n_scales
-        assert t.shape[2] == 1 + self.n_vectors * 3 + self.n_scales
+        assert target.shape[2] == 1 + self.n_vectors * 3 + self.n_scales
 
         # x = x.double()
         x_confidence = x[:, :, 0:1]
@@ -160,10 +160,11 @@ class CompositeLoss(torch.nn.Module):
         x_scales = x[:, :, 1 + self.n_vectors * 3:]
 
         # t = t.double()
-        t_confidence = t[:, :, 0:1]
-        t_regs = t[:, :, 1:1 + self.n_vectors * 3]
-        t_scales = t[:, :, 1 + self.n_vectors * 3:]
-
+        t_confidence = target[:, :, 0:1]
+        t_regs = target[:, :, 1:(1 + self.n_vectors * 3)]
+        t_scales = target[:, :, (1 + self.n_vectors * 3):]
+        # import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
         ce_loss = self._confidence_loss(x_confidence, t_confidence)
         reg_losses = self._localization_loss(x_regs, t_regs)
         scale_losses = self._scale_losses(x_scales, t_scales)

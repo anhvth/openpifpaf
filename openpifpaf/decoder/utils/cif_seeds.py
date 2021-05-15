@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 
 class CifSeeds:
-    threshold = 0.05
+    threshold = 0.5
     score_scale = 1.0
     debug_visualizer = visualizer.Seeds()
     ablation_nms = False

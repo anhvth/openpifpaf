@@ -9,7 +9,7 @@ from .annrescaler import AnnRescaler
 from .. import headmeta
 from ..visualizer import Caf as CafVisualizer
 from ..utils import mask_valid_area
-
+from avcv import get_name
 LOG = logging.getLogger(__name__)
 
 
@@ -103,7 +103,10 @@ class AssociationFiller:
         fields = self.fields_as_tensor(valid_area)
 
         self.visualizer.processed_image(image)
-        self.visualizer.targets(fields, annotation_dicts=anns)
+        img_basename = get_name(meta['file_name'])
+        name_signature = f'caf-target-{img_basename}'
+        
+        self.visualizer.targets(fields, annotation_dicts=anns, name_signature=name_signature)
 
         return fields
 

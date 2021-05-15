@@ -48,7 +48,7 @@ class Base:
         Base._image_meta = meta
 
     @classmethod
-    def processed_image(cls, image):
+    def processed_image(cls, image, meta=None):
         if image is None:
             Base._processed_image = None
             return

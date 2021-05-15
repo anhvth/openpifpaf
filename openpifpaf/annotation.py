@@ -41,7 +41,7 @@ class Annotation(Base):
             self.score_weights = np.asarray(self.score_weights)
         if self.suppress_score_index:
             self.score_weights[-len(self.suppress_score_index):] = 0.0
-        self.score_weights /= np.sum(self.score_weights)
+        # self.score_weights /= np.sum(self.score_weights)
 
     @classmethod
     def from_cif_meta(cls, cif_meta: headmeta.Cif):
