@@ -50,10 +50,7 @@ for dataset in ['train', 'val']:
     img_dir = osp.join(ROOT_DIR, dataset, 'image')
     image_paths = get_paths(img_dir)
     assert len(image_paths), img_dir
-    # sample = read_json('data-mscoco/annotations/mini_json.json')
-    # import ipdb; ipdb.set_trace()
-    # _ann = sample['annotations'][0]
-    # _img = sample['images'][0]
+
     ann_id = 0
     images = []
     annotations = []
