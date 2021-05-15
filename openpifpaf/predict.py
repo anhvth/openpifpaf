@@ -8,7 +8,7 @@ import os
 
 import PIL
 import torch
-
+import os.path as osp
 from openpifpaf import datasets, decoder, logger, network, show, transforms, visualizer, __version__
 
 LOG = logging.getLogger(__name__)
@@ -161,9 +161,9 @@ def main():
         pred_batch = processor.batch(model, image_tensors_batch, device=args.device)
 
         # unbatch
-        for pred, meta in zip(pred_batch, meta_batch):
+        for preds, meta in zip(pred_batch, meta_batch):
             LOG.info('batch %d: %s', batch_i, meta['file_name'])
-            pred = [ann.inverse_transform(meta) for ann in pred]
+            preds = [pred.inverse_transform(meta) for pred in preds]
 
             # load the original image if necessary
             cpu_image = None
@@ -178,16 +178,19 @@ def main():
                     args.json_output, meta['file_name'], '.predictions.json')
                 LOG.debug('json output = %s', json_out_name)
                 with open(json_out_name, 'w') as f:
-                    json.dump([ann.json_data() for ann in pred], f)
+                    json.dump([ann.json_data() for ann in preds], f)
 
             # image output
             if args.show or args.image_output is not None:
                 ext = show.Canvas.out_file_extension
-                image_out_name = out_name(
-                    args.image_output, meta['file_name'], '.predictions.' + ext)
-                LOG.debug('image output = %s', image_out_name)
+                name = args.image_output if args.image_output is not None else osp.basename(meta['file_name'])
+                image_out_name = out_name(name, meta['file_name'], '.predictions.' + ext)
+                image_out_name = osp.join('./cache', image_out_name)
+                os.makedirs('./cache', exist_ok=True)
+                LOG.debug('->save output image to ->  %s', image_out_name)
+                
                 with show.image_canvas(cpu_image, image_out_name) as ax:
-                    annotation_painter.annotations(ax, pred)
+                    annotation_painter.annotations(ax, preds)
 
 
 if __name__ == '__main__':

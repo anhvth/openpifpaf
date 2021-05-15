@@ -219,7 +219,7 @@ class CifCaf(Decoder):
         caf_scored = utils.CafScored(cifhr.accumulated).fill(fields, self.caf_metas)
 
         occupied = utils.Occupancy(cifhr.accumulated.shape, 2, min_scale=4)
-        annotations = []
+        predictions = []
 
         def mark_occupied(ann):
             joint_is = np.flatnonzero(ann.data[:, 2])
@@ -234,7 +234,7 @@ class CifCaf(Decoder):
 
         for ann in initial_annotations:
             self._grow(ann, caf_scored)
-            annotations.append(ann)
+            predictions.append(ann)
             mark_occupied(ann)
 
         for v, f, x, y, s in seeds.get():
@@ -247,25 +247,25 @@ class CifCaf(Decoder):
                              ).add(f, (x, y, v))
             ann.joint_scales[f] = s
             self._grow(ann, caf_scored)
-            annotations.append(ann)
+            predictions.append(ann)
             mark_occupied(ann)
 
         self.occupancy_visualizer.predicted(occupied)
 
-        LOG.debug('annotations %d, %.3fs', len(annotations), time.perf_counter() - start)
+        LOG.debug('annotations %d, %.3fs', len(predictions), time.perf_counter() - start)
 
-        if self.force_complete:
+        if self.force_complete or True:
             if self.nms_before_force_complete and self.nms is not None:
                 assert self.nms.instance_threshold > 0.0
-                annotations = self.nms.annotations(annotations)
-            annotations = self.complete_annotations(cifhr, fields, annotations)
+                predictions = self.nms.annotations(predictions)
+            predictions = self.complete_annotations(cifhr, fields, predictions)
 
         if self.nms is not None:
-            annotations = self.nms.annotations(annotations)
+            predictions = self.nms.annotations(predictions)
 
-        LOG.info('%d annotations: %s', len(annotations),
-                 [np.sum(ann.data[:, 2] > 0.1) for ann in annotations])
-        return annotations
+        LOG.info('%d annotations: %s', len(predictions),
+                 [np.sum(ann.data[:, 2] > 0.1) for ann in predictions])
+        return predictions
 
     def connection_value(self, ann, caf_scored, start_i, end_i, *, reverse_match=True):
         caf_i, forward = self.by_source[start_i][end_i]

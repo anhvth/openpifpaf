@@ -341,7 +341,9 @@ class Trainer():
             last_batch_end = time.time()
 
         self.apply_ema()
-        LOG.info({
+
+        
+        log_info = {
             'type': 'train-epoch',
             'epoch': epoch + 1,
             'loss': round(epoch_loss / len(scenes), 5),
@@ -350,9 +352,15 @@ class Trainer():
             'time': round(time.time() - start_time, 1),
             'n_clipped_grad': self.n_clipped_grad,
             'max_norm': self.max_norm,
-        })
+        }
+        if epoch == self.epochs-1:
+            # import ipdb; ipdb.set_trace()
+            meta = self.cache[0][-1][0]
+            log_info.update(dict(local_debug_file=meta['local_file_path']))
+        LOG.info(log_info)
         self.n_clipped_grad = 0
         self.max_norm = 0.0
+        
 
     def val(self, scenes, epoch):
         start_time = time.time()

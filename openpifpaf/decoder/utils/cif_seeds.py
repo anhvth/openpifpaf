@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 
 class CifSeeds:
-    threshold = 0.5
+    threshold = 0.05
     score_scale = 1.0
     debug_visualizer = visualizer.Seeds()
     ablation_nms = False
@@ -38,6 +38,7 @@ class CifSeeds:
         for field_i, p in enumerate(cif):
             if meta.decoder_seed_mask is not None and not meta.decoder_seed_mask[field_i]:
                 continue
+            
             p = p[:, p[0] > self.threshold]
             if meta.decoder_min_scale:
                 p = p[:, p[4] > meta.decoder_min_scale / meta.stride]
@@ -57,8 +58,8 @@ class CifSeeds:
                 v = v * self.score_scale
             m = v > self.threshold
             x, y, v, s = x[m] * meta.stride, y[m] * meta.stride, v[m], s[m] * meta.stride
-
             for vv, xx, yy, ss in zip(v, x, y, s):
+                vv = 1
                 self.seeds.append((vv, field_i, xx, yy, ss))
 
         LOG.debug('seeds %d, %.3fs (C++ %.3fs)', len(self.seeds), time.perf_counter() - start, sv)
