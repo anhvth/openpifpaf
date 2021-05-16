@@ -32,7 +32,7 @@
 python openpifpaf/train.py \
   --lr=2e-5 --momentum=0.9 --b-scale=5.0 \
   --epochs=100  \
-  --batch-size=8 --val-interval=10 \
+  --batch-size=24 --val-interval=10 \
   --weight-decay=1e-5 \
   --dataset=parking_line_kp --parking_line_kp-upsample=2 --parking_line_kp-no-augmentation \
   --basenet=mobilenetv2 $@

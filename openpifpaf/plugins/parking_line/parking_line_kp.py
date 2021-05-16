@@ -29,13 +29,12 @@ try:
 except ImportError:
     pass
 
-ROOT_DIR = '/data/fisheye-parking/1k8_12Mar/'
 class ParkingLineKp(openpifpaf.datasets.DataModule, openpifpaf.Configurable):
-    train_annotations = osp.join(ROOT_DIR, 'train_keypoints.json')
-    val_annotations = osp.join(ROOT_DIR, 'train_keypoints.json')
+    train_annotations = osp.join('/data/fisheye-parking/', 'all_data_keypoints.json')
+    val_annotations = "/data/fisheye-parking/1k8_12Mar/val_keypoints.json"
     eval_annotations = val_annotations
-    train_image_dir = osp.join(ROOT_DIR, 'train', 'image')
-    val_image_dir = osp.join(ROOT_DIR, 'train', 'image')
+    train_image_dir = '/data/fisheye-parking/all_data/image'
+    val_image_dir = '/data/fisheye-parking/1k8_12Mar/val/image/'
     eval_image_dir = val_image_dir
 
     square_edge = 385
