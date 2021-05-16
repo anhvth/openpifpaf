@@ -27,14 +27,15 @@
 
 
 #--------------- Overfit - line
-rm -r ./outputs
+# --lr=0.00002 --momentum=0.95  --b-scale=5.0 \
+
 python openpifpaf/train.py \
-  --lr=10e-5 --momentum=0.9 --b-scale=5.0 \
-  --epochs=1000 --lr-warm-up-epochs=100 \
-  --batch-size=1 --train-batches=1 --val-batches=1 --val-interval=10000 \
+  --lr=2e-5 --momentum=0.9 --b-scale=5.0 \
+  --epochs=100  \
+  --batch-size=8 --val-interval=10 \
   --weight-decay=1e-5 \
   --dataset=parking_line_kp --parking_line_kp-upsample=2 --parking_line_kp-no-augmentation \
-  --basenet=resnet50 --disable-cuda --debug  --save-all --debug-indices cif:1 
+  --basenet=mobilenetv2 $@
 
 
   # dpython openpifpaf/train.py \

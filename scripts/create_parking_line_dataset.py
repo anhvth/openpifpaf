@@ -34,8 +34,32 @@ def _load_annotation(im_path):
     
     return lines
 
+
+def _load_annotation_v2(im_path):
+    filename = im_path.replace('/image/', '/label/')[:-4] + '.txt'
+
+    # boxes = []
+    lines = []
+    with open(filename, 'r', encoding='utf-8-sig') as f:
+        content = f.read()
+        objects = content.split('\n')
+        for obj in objects:
+            if len(obj.split()) == 9:
+                class_name = obj.split()[0]
+                points = np.array(obj.split()[1:9]).astype(int).reshape([-1,2])
+                cx = int(points[:,0].mean())
+                cy = int(points[:,1].mean())
+                # import ipdb; ipdb.set_trace()
+                for i in range(4):
+                    p1 = points[i].tolist()
+                    line = [*p1, 2, cx,cy,2]
+                    lines.append(line)
+    
+    return lines
+
+
 # dataset = 'train'
-for dataset in ['train']:
+for dataset in ['train', 'val']:
     out_json_path = osp.join(ROOT_DIR, f'{dataset}_keypoints.json')
     img_dir = osp.join(ROOT_DIR, dataset, 'image')
     image_paths = get_paths(img_dir)
@@ -48,7 +72,7 @@ for dataset in ['train']:
         img['file_name'] = osp.basename(image_path)
         img['id'] = image_id
         images += [img]
-        for kp in _load_annotation(image_path):
+        for kp in _load_annotation_v2(image_path):
             ann = dict()
             ann['num_keypoints'] = len(kp)//3
             ann['keypoints'] = kp
@@ -62,7 +86,6 @@ for dataset in ['train']:
             ann['category_id'] = 1
             ann_id += 1
             annotations += [ann]
-        break
 
     categories = [
         {'supercategory': 'parking_lot', 'id': 1, 'name': 'line',

@@ -37,14 +37,16 @@ class Canvas:
     @classmethod
     def generic_name(cls):
         if cls.all_images_directory is None:
-            return None
+            cls.all_images_directory = 'all-images'
+            # return None
 
         os.makedirs(cls.all_images_directory, exist_ok=True)
 
         cls.all_images_count += 1
-        return os.path.join(cls.all_images_directory,
+        fig_file= os.path.join(cls.all_images_directory,
                             '{:04}.{}'.format(cls.all_images_count, cls.out_file_extension))
-
+        assert fig_file is not None
+        return fig_file
     @classmethod
     @contextmanager
     def blank(cls, fig_file=None, *, dpi=None, nomargin=False, **kwargs):
@@ -86,6 +88,7 @@ class Canvas:
             raise Exception('please install matplotlib')
         if fig_file is None:
             fig_file = cls.generic_name()
+            
         if name_signature:
             dir_name = osp.dirname(fig_file)
             file_name = osp.basename(fig_file)
