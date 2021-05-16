@@ -353,7 +353,7 @@ class Trainer():
             'n_clipped_grad': self.n_clipped_grad,
             'max_norm': self.max_norm,
         }
-        if epoch == self.epochs-1:
+        if epoch == self.epochs-1 and hasattr(self, 'cache'):
             # import ipdb; ipdb.set_trace()
             meta = self.cache[0][-1][0]
             log_info.update(dict(local_debug_file=meta['local_file_path']))

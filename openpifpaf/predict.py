@@ -185,8 +185,8 @@ def main():
                 ext = show.Canvas.out_file_extension
                 name = args.image_output if args.image_output is not None else osp.basename(meta['file_name'])
                 image_out_name = out_name(name, meta['file_name'], '.predictions.' + ext)
-                image_out_name = osp.join('./cache', image_out_name)
-                os.makedirs('./cache', exist_ok=True)
+                image_out_name = osp.join('./all-images', 'show', image_out_name)
+                os.makedirs('./all-images/show', exist_ok=True)
                 LOG.debug('->save output image to ->  %s', image_out_name)
                 
                 with show.image_canvas(cpu_image, image_out_name) as ax:
