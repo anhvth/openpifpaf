@@ -1,4 +1,5 @@
 import argparse
+import cv2
 from collections import defaultdict
 import heapq
 import logging
@@ -222,13 +223,13 @@ class CifCaf(Decoder):
         predictions = []
 
         def mark_occupied(ann):
-            joint_is = np.flatnonzero(ann.data[:, 2])
-            for joint_i in joint_is:
-                width = ann.joint_scales[joint_i]
+            list_joints = np.flatnonzero(ann.data[:, 2])
+            for joint in list_joints:
+                width = ann.joint_scales[joint]
                 occupied.set(
-                    joint_i,
-                    ann.data[joint_i, 0],
-                    ann.data[joint_i, 1],
+                    joint,
+                    ann.data[joint, 0],
+                    ann.data[joint, 1],
                     width,  # width = 2 * sigma
                 )
 
@@ -237,19 +238,44 @@ class CifCaf(Decoder):
             predictions.append(ann)
             mark_occupied(ann)
 
+        h,w = cifhr.accumulated.shape[1:]
+        i =0
+        lines = []
+
         for v, f, x, y, s in seeds.get():
+            _mask = np.zeros([h,w,3])
             if occupied.get(f, x, y):
                 continue
 
-            ann = Annotation(self.keypoints,
-                             self.out_skeleton,
-                             score_weights=self.score_weights
+            ann = Annotation(self.keypoints,# ['p1', 'p2']
+                             self.out_skeleton, # [[1, 2], [2, 1]]
+                             score_weights=self.score_weights # [3, 3]
                              ).add(f, (x, y, v))
             ann.joint_scales[f] = s
             self._grow(ann, caf_scored)
             predictions.append(ann)
-            mark_occupied(ann)
+            # mark_occupied(ann)
 
+            # Draw _mask
+            p1 = tuple(ann.data[0][:2].astype(int))
+            p2 = tuple(ann.data[1][:2].astype(int))
+            lines.append([p1,p2])
+
+
+        # lens  = np.array(lines)
+        # lens = ((lens[:,0]-lens[:,1])**2).sum(1)
+        # lens = np.sqrt(lens)
+        # for (p1, p2), l in zip(lines, lens):
+        #     if abs(l/np.median(lens) - 1) < 0.4:
+        #         print('Line:', p1, '->',p2)
+        #         from avcv import put_text
+        #         put_text(_mask, p1, f"{v:0.2f}")
+        #         cv2.line(_mask, p1, p2, (255,0,0), 3)
+        #         import matplotlib.pyplot as plt; plt.imshow(_mask); plt.savefig(f'test_{i}.jpg'); plt.close()
+        #         i+=1
+
+
+        print('Num of prediction lines:', len(predictions))
         self.occupancy_visualizer.predicted(occupied)
 
         LOG.debug('annotations %d, %.3fs', len(predictions), time.perf_counter() - start)
@@ -367,7 +393,7 @@ class CifCaf(Decoder):
                 heapq.heappush(frontier, (-score, new_xysv, start_i, end_i))
 
         # seeding the frontier
-        for joint_i in np.flatnonzero(ann.data[:, 2]):
+        for joint_i in np.flatnonzero(ann.data[:, 2]): # array([0])
             add_to_frontier(joint_i)
 
         while True:
@@ -375,16 +401,16 @@ class CifCaf(Decoder):
             if entry is None:
                 break
 
-            _, new_xysv, jsi, jti = entry
-            if ann.data[jti, 2] > 0.0:
+            _, new_xysv, joint_source_i, joint_target_i = entry
+            if ann.data[joint_target_i, 2] > 0.0:
                 continue
 
-            ann.data[jti, :2] = new_xysv[:2]
-            ann.data[jti, 2] = new_xysv[3]
-            ann.joint_scales[jti] = new_xysv[2]
+            ann.data[joint_target_i, :2] = new_xysv[:2] #xy
+            ann.data[joint_target_i, 2] = new_xysv[3]#v
+            ann.joint_scales[joint_target_i] = new_xysv[2]
             ann.decoding_order.append(
-                (jsi, jti, np.copy(ann.data[jsi]), np.copy(ann.data[jti])))
-            add_to_frontier(jti)
+                (joint_source_i, joint_target_i, np.copy(ann.data[joint_source_i]), np.copy(ann.data[joint_target_i])))
+            add_to_frontier(joint_target_i)
 
     def _flood_fill(self, ann):
         frontier = []
