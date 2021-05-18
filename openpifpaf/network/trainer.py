@@ -164,6 +164,14 @@ class Trainer():
 
     # pylint: disable=method-hidden,too-many-branches,too-many-statements
     def train_batch(self, data, targets, apply_gradients=True):
+        # ----
+        t = targets[0][0]#2, 5, 25, 25])
+
+
+
+        #------
+
+
         if self.device.type != 'cpu':
             assert data.is_pinned(), 'input data must be pinned'
             if targets[0] is not None:

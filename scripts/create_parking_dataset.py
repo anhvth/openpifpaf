@@ -2,7 +2,7 @@ import ipdb
 from avcv import *
 
 
-ROOT_DIR = "/workdir/data/fisheye-parking/1k8_12Mar"
+ROOT_DIR = "/data/fisheye-parking/1k8_12Mar"
 
 
 def process(box):

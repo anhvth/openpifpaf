@@ -15,7 +15,8 @@ from . import metric
 from . import network
 from . import optimize
 from . import plugin
-
+from . import visualizer
+from . import utils
 from .datasets import DATAMODULES
 from .decoder import DECODERS
 from .network.factory import BASE_FACTORIES, BASE_TYPES, CHECKPOINT_URLS, HEADS

@@ -27,8 +27,9 @@
 
 
 #--------------- Overfit - line
+
 rm -r ./outputs
-python openpifpaf/train.py \
+dpython openpifpaf/train.py \
   --lr=10e-5 --momentum=0.9 --b-scale=5.0 \
   --epochs=1000 --lr-warm-up-epochs=100 \
   --batch-size=1 --train-batches=1 --val-batches=1 --val-interval=10000 \

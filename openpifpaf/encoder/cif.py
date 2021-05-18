@@ -33,9 +33,9 @@ class Cif:
 class CifGenerator():
     def __init__(self, config: Cif):
         self.config = config
-
+        stride = config.meta.stride
         self.rescaler = config.rescaler or AnnRescaler(
-            config.meta.stride, config.meta.pose)
+            stride, config.meta.pose)
         self.visualizer = config.visualizer or CifVisualizer(config.meta)
 
         self.intensities = None
@@ -47,13 +47,13 @@ class CifGenerator():
         self.sink = create_sink(config.side_length)
         self.s_offset = (config.side_length - 1.0) / 2.0
 
-    def __call__(self, image, anns, meta):
+    def __call__(self, image, anns, img_meta):
         width_height_original = image.shape[2:0:-1]
 
         keypoint_sets = self.rescaler.keypoint_sets(anns)
         bg_mask = self.rescaler.bg_mask(anns, width_height_original,
                                         crowd_margin=(self.config.side_length - 1) / 2)
-        valid_area = self.rescaler.valid_area(meta)
+        valid_area = self.rescaler.valid_area(img_meta)
         LOG.debug('valid area: %s, pif side length = %d', valid_area, self.config.side_length)
 
         n_fields = len(self.config.meta.keypoints)
@@ -62,10 +62,9 @@ class CifGenerator():
         fields = self.fields(valid_area)
 
         self.visualizer.processed_image(image)
-        img_basename = get_name(meta['file_name'])
+        img_basename = get_name(img_meta['file_name'])
         name_signature = f'cif-target-{img_basename}'
         self.visualizer.targets(fields, annotation_dicts=anns, name_signature=name_signature)
-
         return fields
 
     def init_fields(self, n_fields, bg_mask):

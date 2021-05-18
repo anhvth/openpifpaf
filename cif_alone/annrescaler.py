@@ -68,7 +68,6 @@ class AnnRescaler():
                         break  # only need to suppress a keypoint once
 
         for keypoints in keypoint_sets:
-            assert self.stride is not None
             keypoints[:, :2] /= self.stride
         return keypoint_sets
 

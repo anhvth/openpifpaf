@@ -2,8 +2,8 @@ import ipdb
 from avcv import *
 
 
-# ROOT_DIR = "/workdir/data/fisheye-parking/1k8_12Mar"
-ROOT_DIR = "/data/fisheye-parking/"
+ROOT_DIR = "/data/fisheye-parking/1k8_12Mar"
+# ROOT_DIR = "/data/fisheye-parking/"
 
 def process(box):
     out = []
@@ -59,8 +59,8 @@ def _load_annotation_v2(im_path):
 
 
 # dataset = 'train'
-# for dataset in ['train', 'val']:
-for dataset in ["all_data"]:
+for dataset in ['train', 'val']:
+# for dataset in ["all_data"]:
     out_json_path = osp.join(ROOT_DIR, f'{dataset}_keypoints.json')
     img_dir = osp.join(ROOT_DIR, dataset, 'image')
     image_paths = get_paths(img_dir)

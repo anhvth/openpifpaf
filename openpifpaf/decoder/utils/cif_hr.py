@@ -2,6 +2,7 @@ import logging
 import time
 
 import numpy as np
+from avcv import plot_images
 
 # pylint: disable=import-error
 from ...functional import scalar_square_add_gauss_with_max

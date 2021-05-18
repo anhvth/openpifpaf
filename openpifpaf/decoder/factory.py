@@ -23,6 +23,7 @@ def cli(parser, *, workers=None):
 
     group.add_argument('--seed-threshold', default=utils.CifSeeds.threshold, type=float,
                        help='minimum threshold for seeds')
+
     assert utils.nms.Detection.instance_threshold == utils.nms.Keypoints.instance_threshold
     group.add_argument('--instance-threshold', type=float, default=None,
                        help=('filter instances by score (0.0 with --force-complete-pose '

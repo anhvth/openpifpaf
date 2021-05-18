@@ -238,12 +238,12 @@ class CifCaf(Decoder):
             predictions.append(ann)
             mark_occupied(ann)
 
-        h,w = cifhr.accumulated.shape[1:]
-        i =0
-        lines = []
+        # h,w = cifhr.accumulated.shape[1:]
+        # i =0
+        # lines = []
 
         for v, f, x, y, s in seeds.get():
-            _mask = np.zeros([h,w,3])
+            # _mask = np.zeros([h,w,3])
             if occupied.get(f, x, y):
                 continue
 
@@ -254,12 +254,12 @@ class CifCaf(Decoder):
             ann.joint_scales[f] = s
             self._grow(ann, caf_scored)
             predictions.append(ann)
-            # mark_occupied(ann)
+            mark_occupied(ann)
 
             # Draw _mask
-            p1 = tuple(ann.data[0][:2].astype(int))
-            p2 = tuple(ann.data[1][:2].astype(int))
-            lines.append([p1,p2])
+            # p1 = tuple(ann.data[0][:2].astype(int))
+            # p2 = tuple(ann.data[1][:2].astype(int))
+            # lines.append([p1,p2])
 
 
         # lens  = np.array(lines)
@@ -275,14 +275,14 @@ class CifCaf(Decoder):
         #         i+=1
 
 
-        print('Num of prediction lines:', len(predictions))
+        # print('Num of prediction lines:', len(predictions))
         self.occupancy_visualizer.predicted(occupied)
 
         LOG.debug('annotations %d, %.3fs', len(predictions), time.perf_counter() - start)
 
-        if self.force_complete or True:
+        if self.force_complete:
             if self.nms_before_force_complete and self.nms is not None:
-                assert self.nms.instance_threshold > 0.0
+                assert self.nms.instance_threshold > 0.0, self.nms.instance_threshold
                 predictions = self.nms.annotations(predictions)
             predictions = self.complete_annotations(cifhr, fields, predictions)
 
@@ -295,14 +295,14 @@ class CifCaf(Decoder):
 
     def connection_value(self, ann, caf_scored, start_i, end_i, *, reverse_match=True):
         caf_i, forward = self.by_source[start_i][end_i]
-        caf_f, caf_b = caf_scored.directed(caf_i, forward)
+        caf_forward, caf_backward = caf_scored.directed(caf_i, forward)
         xyv = ann.data[start_i]
-        xy_scale_s = max(0.0, ann.joint_scales[start_i])
+        source_scale = max(0.0, ann.joint_scales[start_i])
 
         only_max = self.connection_method == 'max'
 
         new_xysv = grow_connection_blend(
-            caf_f, xyv[0], xyv[1], xy_scale_s, only_max)
+            caf_forward, xyv[0], xyv[1], source_scale, only_max)
         if new_xysv[3] == 0.0:
             return 0.0, 0.0, 0.0, 0.0
         keypoint_score = np.sqrt(new_xysv[3] * xyv[2])  # geometric mean
@@ -310,15 +310,15 @@ class CifCaf(Decoder):
             return 0.0, 0.0, 0.0, 0.0
         if keypoint_score < xyv[2] * self.keypoint_threshold_rel:
             return 0.0, 0.0, 0.0, 0.0
-        xy_scale_t = max(0.0, new_xysv[2])
+        xys_target = max(0.0, new_xysv[2])
 
         # reverse match
         if self.reverse_match and reverse_match:
             reverse_xyv = grow_connection_blend(
-                caf_b, new_xysv[0], new_xysv[1], xy_scale_t, only_max)
+                caf_backward, new_xysv[0], new_xysv[1], xys_target, only_max)
             if reverse_xyv[2] == 0.0:
                 return 0.0, 0.0, 0.0, 0.0
-            if abs(xyv[0] - reverse_xyv[0]) + abs(xyv[1] - reverse_xyv[1]) > xy_scale_s:
+            if abs(xyv[0] - reverse_xyv[0]) + abs(xyv[1] - reverse_xyv[1]) > source_scale:
                 return 0.0, 0.0, 0.0, 0.0
 
         return (new_xysv[0], new_xysv[1], new_xysv[2], keypoint_score)
@@ -397,20 +397,21 @@ class CifCaf(Decoder):
             add_to_frontier(joint_i)
 
         while True:
+            # entry contain joint_souce and joint_target, what how it gets joint_target
             entry = frontier_get()
             if entry is None:
                 break
 
-            _, new_xysv, joint_source_i, joint_target_i = entry
-            if ann.data[joint_target_i, 2] > 0.0:
+            _, new_xysv, joint_source, joint_target = entry
+            if ann.data[joint_target, 2] > 0.0:
                 continue
 
-            ann.data[joint_target_i, :2] = new_xysv[:2] #xy
-            ann.data[joint_target_i, 2] = new_xysv[3]#v
-            ann.joint_scales[joint_target_i] = new_xysv[2]
+            ann.data[joint_target, :2] = new_xysv[:2] #xy
+            ann.data[joint_target, 2] = new_xysv[3]#v
+            ann.joint_scales[joint_target] = new_xysv[2]# scale update
             ann.decoding_order.append(
-                (joint_source_i, joint_target_i, np.copy(ann.data[joint_source_i]), np.copy(ann.data[joint_target_i])))
-            add_to_frontier(joint_target_i)
+                (joint_source, joint_target, np.copy(ann.data[joint_source]), np.copy(ann.data[joint_target])))
+            add_to_frontier(joint_target)
 
     def _flood_fill(self, ann):
         frontier = []
